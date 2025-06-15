@@ -2,8 +2,10 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
+from rag_utils import process_uploaded_file, get_rag_response,reset_context
+from supabase_client import supabase
 import uuid
-from rag_utils import process_uploaded_file, get_rag_response
+from fastapi import UploadFile
 
 app = FastAPI()
 
@@ -34,3 +36,9 @@ class QuestionInput(BaseModel):
 async def ask_question(payload: QuestionInput):
     response = get_rag_response(payload.question)
     return {"answer": response}
+
+
+@app.delete("/reset")
+async def reset_vectorstore():
+    reset_context()
+    return {"status": "success", "message": "All context cleared."}

@@ -8,6 +8,7 @@ from langchain_community.embeddings.sentence_transformer import SentenceTransfor
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
+import shutil
 
 from typing import List
 from langchain_core.documents import Document
@@ -76,3 +77,10 @@ def get_rag_response(question: str) -> str:
     )
 
     return rag_chain.invoke(question)
+
+
+def reset_context():
+    global vectorstore
+    if os.path.exists(persist_directory):
+        shutil.rmtree(persist_directory)
+    vectorstore = None

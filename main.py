@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 from rag_utils import process_uploaded_file, get_rag_response,reset_context
-from supabase_client import supabase
 import uuid
 from fastapi import UploadFile
 

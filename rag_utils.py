@@ -10,6 +10,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.schema.runnable import RunnablePassthrough
 import shutil
 
+
 from typing import List
 from langchain_core.documents import Document
 
@@ -60,8 +61,13 @@ def docs2str(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 def get_rag_response(question: str) -> str:
+    global vectorstore
+
+    if vectorstore is None:
+        return "No documents have been uploaded yet. Please upload a document first."
+
     retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
-    
+
     template = """Answer the question based only on the following context:
     {context}
     Question: {question}
@@ -78,9 +84,28 @@ def get_rag_response(question: str) -> str:
 
     return rag_chain.invoke(question)
 
+def clear_docs_folder(folder_path="docs"):
+    if not os.path.exists(folder_path):
+        return "Docs folder does not exist."
+
+    deleted = []
+    for filename in os.listdir(folder_path):
+        file_path = os.path.join(folder_path, filename)
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                deleted.append(filename)
+        except Exception as e:
+            print(f"Error deleting {file_path}: {e}")
+    
+    return f"Deleted files: {deleted}" if deleted else "No files to delete."
+
+
 
 def reset_context():
     global vectorstore
     if os.path.exists(persist_directory):
         shutil.rmtree(persist_directory)
     vectorstore = None
+    clear_docs_folder()
+

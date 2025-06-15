@@ -1,0 +1,37 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+env/
+
+# dotenv
+.env
+
+# VSCode settings
+.vscode/
+
+# Uploaded files
+docs/
+
+# LangChain / Chroma vectorstore
+chroma_db/
+index/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Postman and OS junk
+*.log
+*.swp
+*.bak

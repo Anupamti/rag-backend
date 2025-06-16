@@ -5,13 +5,17 @@ import os
 from rag_utils import process_uploaded_file, get_rag_response,reset_context
 import uuid
 from fastapi import UploadFile
-
+from dotenv import load_dotenv
 app = FastAPI()
+
+load_dotenv()
+
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",")
 
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -15,9 +15,13 @@ from typing import List
 from langchain_core.documents import Document
 
 load_dotenv()
-llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
 
-embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+MODEL_NAME = os.getenv("MODEL_NAME")
+EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME")
+
+llm = ChatOpenAI(model=MODEL_NAME)
+
+embedding_function = SentenceTransformerEmbeddings(model_name=EMBEDDING_MODEL_NAME)
 collection_name = "my_collection"
 persist_directory = "./chroma_db"
 
@@ -66,9 +70,11 @@ def get_rag_response(question: str) -> str:
     if vectorstore is None:
         return "No documents have been uploaded yet. Please upload a document first."
 
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 2})
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 
-    template = """Answer the question based only on the following context:
+    template = """You are an assistant who answers questions using the following context. 
+    Context may include policy documents, transcripts of conversations with clients, or case manager notes. 
+    Always cite relevant information when possible.
     {context}
     Question: {question}
     Answer:"""

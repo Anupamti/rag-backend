@@ -36,6 +36,43 @@ else:
 
 text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 
+def determine_source_type(filename: str, content: str) -> str:
+    """Determine if the document is a transcript or regular document based on filename and content."""
+    filename_lower = filename.lower()
+    content_lower = content.lower()
+    
+    # Check filename for transcript indicators
+    transcript_keywords_filename = ['transcript', 'conversation', 'interview', 'call', 'meeting']
+    if any(keyword in filename_lower for keyword in transcript_keywords_filename):
+        return "transcript"
+    
+    # Check content for formal transcript indicators
+    transcript_keywords_content = ['speaker:', 'client:', 'interviewer:', 'interviewee:', 'caller:', 'agent:']
+    if any(keyword in content_lower for keyword in transcript_keywords_content):
+        return "transcript"
+    
+    # Check for conversational patterns typical of transcripts
+    conversational_indicators = [
+        'yes, sir', 'no, sir', 'okay', 'yeah', 'right', 'good', 'all right',
+        'i\'m going to start the recording', 'any questions', 'how\'s', 'still'
+    ]
+    
+    # Count conversational indicators
+    indicator_count = sum(1 for indicator in conversational_indicators if indicator in content_lower)
+    
+    # Check for question-answer patterns (look for multiple question marks)
+    question_count = content.count('?')
+    
+    # Check for short responses typical of dialogue
+    lines = content.split('\n')
+    short_lines = [line.strip() for line in lines if len(line.strip()) < 20 and len(line.strip()) > 0]
+    
+    # If we have multiple conversational indicators, questions, and short responses, likely a transcript
+    if indicator_count >= 3 and question_count >= 5 and len(short_lines) >= 10:
+        return "transcript"
+    
+    return "document"
+
 def load_document(file_path: str) -> List[Document]:
     if file_path.endswith(".pdf"):
         loader = PyPDFLoader(file_path)
@@ -43,7 +80,25 @@ def load_document(file_path: str) -> List[Document]:
         loader = Docx2txtLoader(file_path)
     else:
         raise Exception("Unsupported file format")
-    return loader.load()
+    
+    # Load documents
+    docs = loader.load()
+    
+    # Extract filename from path
+    filename = os.path.basename(file_path)
+    
+    # Determine source type based on content of first document (representative of the whole file)
+    sample_content = docs[0].page_content if docs else ""
+    source_type = determine_source_type(filename, sample_content)
+    
+    # Add metadata to all documents
+    for doc in docs:
+        if not hasattr(doc, 'metadata') or doc.metadata is None:
+            doc.metadata = {}
+        doc.metadata['source'] = source_type
+        doc.metadata['filename'] = filename
+    
+    return docs
 
 def process_uploaded_file(file_path: str):
     global vectorstore
@@ -114,4 +169,3 @@ def reset_context():
         shutil.rmtree(persist_directory)
     vectorstore = None
     clear_docs_folder()
-

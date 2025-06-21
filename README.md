@@ -4,11 +4,12 @@ This is a Retrieval-Augmented Generation (RAG) system built using FastAPI.
 🛠️ Getting Started
 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/rag-insight-engine.git
+git clone https://github.com/Anupamti/rag-backend.git
 cd rag-insight-engine
 ```
 2. Change the Branch
 ```bash
+
 git checkout casebasev2
 ```
 

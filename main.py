@@ -85,3 +85,8 @@ async def get_stats():
     from rag_utils import get_collection_stats
     stats = get_collection_stats()
     return stats
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {"status": "ok"}
